@@ -1,14 +1,13 @@
 import random
-from test import connector
 
+import pandas as pd
 from fastapi import FastAPI, Request, Response, status
 from fastapi.staticfiles import StaticFiles
-# from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from handler import connector
+
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-# templates = Jinja2Templates(directory="templates")
 
 
 class User(BaseModel):
@@ -28,13 +27,16 @@ def main(user: User, response: Response):
 
 
 @app.post("/fake/")
-async def create_item(user: User):
-    with open("meals.txt", "r") as file:
-        meals = [i.strip("\n") for i in file.readlines()]
+def fake(user: User):
+
+    df = pd.read_csv("meals.csv")
+    meal = df.sample(n=1).squeeze()
+
     with open("qr.svg", "r") as file:
         qr = file.read()
+
     return {
-        "primary": random.choice(meals),
+        "primary": meal.to_dict(),
         "secondary": random.choice(["دوغ", "نوشابه", "پرتغال"]),
         "qrcode": qr,
         "ncode": random.randint(11111, 99999),
