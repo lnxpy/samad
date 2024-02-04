@@ -39,5 +39,7 @@ def fake(user: User):
         "primary": meal.to_dict(),
         "secondary": random.choice(["دوغ", "نوشابه", "پرتغال"]),
         "qrcode": qr,
+        "name": "ابوالفضل سلیمانی",
+        "wallet": f"{random.randint(1, 10) * 4500:,}",
         "ncode": random.randint(11111, 99999),
     }
