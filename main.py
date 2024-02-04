@@ -1,13 +1,17 @@
+import os
 import random
+from pathlib import Path
 
 import pandas as pd
 from fastapi import FastAPI, Request, Response, status
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from handler import connector
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 class User(BaseModel):
@@ -27,19 +31,19 @@ def main(user: User, response: Response):
 
 
 @app.post("/fake/")
-def fake(user: User):
-
+def fake(user: User, request: Request):
     df = pd.read_csv("meals.csv")
     meal = df.sample(n=1).squeeze()
 
-    with open("qr.svg", "r") as file:
-        qr = file.read()
+    base_url = str(request.base_url).split("://")[1]
+    static_path = Path("static")
+    file_path = base_url / static_path / "qr.png"
 
     return {
         "primary": meal.to_dict(),
         "secondary": random.choice(["دوغ", "نوشابه", "پرتغال"]),
-        "qrcode": qr,
+        "qrcode": file_path,
+        "ncode": random.randint(11111, 99999),
         "name": "ابوالفضل سلیمانی",
         "wallet": f"{random.randint(1, 10) * 4500:,}",
-        "ncode": random.randint(11111, 99999),
     }
